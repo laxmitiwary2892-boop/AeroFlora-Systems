@@ -265,11 +265,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
 
         {/* Atmospheric Tower Showcase Card */}
-        <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 h-60 sm:h-72 max-w-2xl">
+        <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 h-60 sm:h-72 w-full max-w-2xl">
           <ResilientImage
             src={IMAGES.heroWater}
             alt="AeroFlora Mk-IV autonomous solar atmospheric water harvesting tower in an arid Indian orchard"
             className="w-full h-full object-cover"
+            priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/35 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end justify-between gap-4">
