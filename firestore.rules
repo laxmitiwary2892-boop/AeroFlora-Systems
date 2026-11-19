@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll([
+        'uid',
+        'fullName',
+        'email',
+        'role',
+        'organization',
+        'state',
+        'district',
+        'authProvider',
+        'emailVerified',
+        'createdAt',
+        'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'uid',
+        'fullName',
+        'email',
+        'role',
+        'organization',
+        'state',
+        'district',
+        'authProvider',
+        'emailVerified',
+        'createdAt',
+        'updatedAt'
+      ])
+      && data.uid is string
+      && data.uid == userId
+      && data.uid == request.auth.uid
+      && data.uid.size() >= 1 && data.uid.size() <= 128
+      && data.uid.matches('^[a-zA-Z0-9_\\-]+$')
+      && data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 120
+      && data.email is string && data.email.size() >= 3 && data.email.size() <= 254
+      && data.role in ['farmer', 'agronomist', 'technician', 'fpo_admin', 'platform_admin']
+      && data.organization is string && data.organization.size() <= 160
+      && data.state is string && data.state.size() <= 80
+      && data.district is string && data.district.size() <= 80
+      && data.authProvider in ['google', 'password']
+      && data.emailVerified is bool
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId} {
+      // Strictly isolate PII: only the owning user can get their own document; list is forbidden.
+      allow get: if isValidId(userId) && isOwner(userId);
+      allow list: if false;
+
+      allow create: if isValidId(userId)
+        && isVerifiedUser()
+        && isOwner(userId)
+        && isValidUserProfile(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+
+      allow update: if isValidId(userId)
+        && isVerifiedUser()
+        && isOwner(userId)
+        && isValidUserProfile(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().authProvider == existing().authProvider
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'fullName',
+          'email',
+          'role',
+          'organization',
+          'state',
+          'district',
+          'emailVerified',
+          'updatedAt'
+        ]);
+
+      allow delete: if false;
+    }
+  }
+}

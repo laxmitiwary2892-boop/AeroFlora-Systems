@@ -1,0 +1,6 @@
+{
+  "name": "AeroFlora Systems",
+  "description": "India-first AgriTech, Farm Water Intelligence, and Autonomous Atmospheric Water Harvesting (AWH) Platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,89 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated AeroFlora Systems operator, farmer, agronomist, or FPO administrator profile.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID matching the document ID."
+        },
+        "fullName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "Full display name of the user."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "minLength": 3,
+          "maxLength": 254,
+          "description": "Verified email address."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["farmer", "agronomist", "technician", "fpo_admin", "platform_admin"],
+          "description": "Active operational role within AeroFlora Systems."
+        },
+        "organization": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "Farm holding, FPO, or KVK affiliation."
+        },
+        "state": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Indian State or Union Territory."
+        },
+        "district": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "District name."
+        },
+        "authProvider": {
+          "type": "string",
+          "enum": ["google", "password"],
+          "description": "Authentication provider used at account creation."
+        },
+        "emailVerified": {
+          "type": "boolean",
+          "description": "Whether the user email address is verified."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of initial profile creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of latest profile update."
+        }
+      },
+      "required": [
+        "uid",
+        "fullName",
+        "email",
+        "role",
+        "organization",
+        "state",
+        "district",
+        "authProvider",
+        "emailVerified",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private user profile documents keyed by Firebase Auth UID."
+    }
+  }
+}
